@@ -72,6 +72,19 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     protected $_statement = null;
 
+    /**
+     * An array containing all rows already fetched.
+     *
+     * @var array[]
+     */
+    protected $cache      = array();
+
+    /**
+     * Whether the iterator has reached the cache end or not.
+     *
+     * @var bool
+     */
+    protected $break      = true;
 
 
     /**
@@ -120,7 +133,7 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      * @access  public
      * @param   array   $bindParameters    Bind parameters values if bindParam
      *                                     is not called.
-     * @return  \Hoa\Database\Pdo\Statement
+     * @return  \Hoa\Database\Layer\Pdo\Statement
      * @throw   \Hoa\Database\Exception
      */
     public function execute ( Array $bindParameters = null ) {
@@ -128,6 +141,9 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
         if(false === $this->getStatement()->execute($bindParameters))
             throw new \Hoa\Database\Exception(
                 '%3$s (%1$s/%2$d)', 0, $this->errorInfo());
+
+        $this->cache    = array();
+        $this->break    = true;
 
         return $this;
     }
@@ -156,24 +172,106 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
     }
 
     /**
-     * Return an array containing all of the result set rows.
+     * Rewind iterator cache.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function rewind ( ) {
+
+        $this->break = empty($this->cache);
+        reset($this->cache);
+
+        if ($this->break)
+            $this->next();
+
+        return;
+    }
+
+    /**
+     * Checks if current row is valid.
+     *
+     * @access  public
+     * @return  bool
+     */
+    public function valid ( ) {
+
+        return (false === $this->break);
+    }
+
+    /**
+     * Return the current row value.
      *
      * @access  public
      * @return  array
+     */
+    public function current ( ) {
+
+        return current($this->cache);
+    }
+
+    /**
+     * Return the current row key.
+     *
+     * @access  public
+     * @return  int
+     */
+    public function key ( ) {
+
+        return key($this->cache);
+    }
+
+    /**
+     * Fetches the next row from a result set.
+     *
+     * @access  public
+     * @return  void
+     * @throw   \Hoa\Database\Exception
+     */
+    public function next ( ) {
+
+        if (false === next($this->cache))
+            if ($row = $this->fetch()) {
+
+                $this->cache[] = $row;
+                $this->break   = false;
+            } else
+                $this->break   = true;
+
+        return;
+    }
+
+    /**
+     * Return an array containing all of the result set rows.
+     *
+     * @access  public
+     * @return  array[]
      * @throw   \Hoa\Database\Exception
      */
     public function fetchAll ( ) {
 
-        return $this->getStatement()->fetchAll(\PDO::FETCH_ASSOC);
+        static $_fetched = false;
+
+        if (!$_fetched) {
+            $this->cache = array_merge(
+                $this->cache,
+                $this->getStatement()->fetchAll(\PDO::FETCH_ASSOC)
+            );
+
+            $this->rewind();
+            $_fetched = true;
+        }
+
+        return $this->cache;
     }
 
     /**
-     * Fetch the next row in the result set.
+     * Fetch a row in the result set.
      *
      * @access  protected
      * @param   int  $orientation    Must be one of the \PDO::FETCH_ORI_*
      *                               constants.
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     protected function fetch ( $orientation = \PDO::FETCH_ORI_NEXT ) {
@@ -188,48 +286,64 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      * Fetch the first row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchFirst ( ) {
 
-        return $this->fetch(\PDO::FETCH_ORI_FIRST);
+        $this->rewind();
+
+        return $this->current();
     }
 
     /**
      * Fetch the last row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchLast ( ) {
 
-        return $this->fetch(\PDO::FETCH_ORI_LAST);
+        static $_lastKey = null;
+
+        if (null === $_lastKey) {
+            $_lastKey = $this->getStatement()->rowCount() - 1;
+            $this->cache[$_lastKey] = $this->fetch(\PDO::FETCH_ORI_LAST);
+        }
+
+        return end($this->cache);
     }
 
     /**
      * Fetch the next row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchNext ( ) {
 
-        return $this->fetch(\PDO::FETCH_ORI_NEXT);
+        $this->next();
+
+        return $this->current();
     }
 
     /**
      * Fetch the previous row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchPrior ( ) {
 
-        return $this->fetch(\PDO::FETCH_ORI_PRIOR);
+        $previousKey = $this->key() - 1;
+
+        if (!isset($this->cache[$previousKey]))
+            $this->cache[$previousKey] = $this->fetch(\PDO::FETCH_ORI_PRIOR);
+
+        return prev($this->cache);
     }
 
     /**

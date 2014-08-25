@@ -47,7 +47,7 @@ namespace Hoa\Database {
  * @license    New BSD License
  */
 
-class DalStatement {
+class DalStatement implements \Hoa\Database\IDal\WrapperStatement {
 
     /**
      * The statement instance.
@@ -152,10 +152,66 @@ class DalStatement {
     }
 
     /**
-     * Return an array containing all of the result set rows.
+     * Rewinds iterator cache.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function rewind ( ) {
+
+        return $this->getStatement()->rewind();
+    }
+
+    /**
+     * Checks if current row is valid.
+     *
+     * @access  public
+     * @return  bool
+     */
+    public function valid ( ) {
+
+        return $this->getStatement()->valid();
+    }
+
+    /**
+     * Return the current row value.
      *
      * @access  public
      * @return  array
+     */
+    public function current ( ) {
+
+        return $this->getStatement()->current();
+    }
+
+    /**
+     * Return the current row key.
+     *
+     * @access  public
+     * @return  int
+     */
+    public function key ( ) {
+
+        return $this->getStatement()->key();
+    }
+
+    /**
+     * Fetches the next row from a result set.
+     *
+     * @access  public
+     * @return  void
+     * @throw   \Hoa\Database\Exception
+     */
+    public function next ( ) {
+
+        return $this->getStatement()->next();
+    }
+
+    /**
+     * Return an array containing all of the result set rows.
+     *
+     * @access  public
+     * @return  array[]
      * @throw   \Hoa\Database\Exception
      */
     public function fetchAll ( ) {
@@ -167,7 +223,7 @@ class DalStatement {
      * Fetch the first row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchFirst ( ) {
@@ -179,7 +235,7 @@ class DalStatement {
      * Fetch the last row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchLast ( ) {
@@ -191,7 +247,7 @@ class DalStatement {
      * Fetch the next row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchNext ( ) {
@@ -203,7 +259,7 @@ class DalStatement {
      * Fetch the previous row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchPrior ( ) {
