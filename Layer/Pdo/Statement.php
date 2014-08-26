@@ -86,6 +86,13 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     protected $break      = true;
 
+    /**
+     * Number of rows.
+     *
+     * @var int
+     */
+    protected $rowCount   = null;
+
 
     /**
      * Create a statement instance.
@@ -144,6 +151,7 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
 
         $this->cache    = array();
         $this->break    = true;
+        $this->rowCount = null;
 
         return $this;
     }
@@ -250,16 +258,13 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function fetchAll ( ) {
 
-        static $_fetched = false;
-
-        if (!$_fetched) {
+        if (count($this->cache) != $this->rowCount()) {
             $this->cache = array_merge(
                 $this->cache,
                 $this->getStatement()->fetchAll(\PDO::FETCH_ASSOC)
             );
 
             $this->rewind();
-            $_fetched = true;
         }
 
         return $this->cache;
@@ -305,12 +310,8 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function fetchLast ( ) {
 
-        static $_lastKey = null;
-
-        if (null === $_lastKey) {
-            $_lastKey = $this->getStatement()->rowCount() - 1;
-            $this->cache[$_lastKey] = $this->fetch(\PDO::FETCH_ORI_LAST);
-        }
+        if (!isset($this->cache[$key = $this->rowCount() - 1]))
+            $this->cache[$key] = $this->fetch(\PDO::FETCH_ORI_LAST);
 
         return end($this->cache);
     }
@@ -358,6 +359,21 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
     public function fetchColumn ( $column = 0 ) {
 
         return $this->getStatement()->fetchColumn($column);
+    }
+
+    /**
+     * Returns the number of rows affected by the last SQL statement
+     *
+     * @access  public
+     * @return  int
+     * @throw   \Hoa\Database\Exception
+     */
+    public function rowCount ( ) {
+
+        if (null === $this->rowCount)
+            $this->rowCount = $this->getStatement()->rowCount();
+
+        return $this->rowCount;
     }
 
     /**

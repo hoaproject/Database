@@ -131,6 +131,15 @@ interface WrapperStatement extends \Hoa\Iterator {
     public function fetchColumn ( $column = 0 );
 
     /**
+     * Returns the number of rows affected by the last SQL statement
+     *
+     * @access  public
+     * @return  int
+     * @throw   \Hoa\Database\Exception
+     */
+    public function rowCount ( );
+
+    /**
      * Close the cursor, enabling the statement to be executed again.
      *
      * @access  public
