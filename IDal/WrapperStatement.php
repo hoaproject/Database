@@ -47,7 +47,9 @@ namespace Hoa\Database\IDal {
  * @license    New BSD License
  */
 
-interface WrapperStatement extends \Hoa\Iterator, \Countable {
+interface WrapperStatement
+    extends \Countable,
+            \Hoa\Iterator {
 
     /**
      * Execute a prepared statement.
