@@ -75,16 +75,9 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
     /**
      * An array containing all rows already fetched.
      *
-     * @var array[]
+     * @var \SplFixedArray object
      */
     protected $cache      = array();
-
-    /**
-     * Whether the iterator has reached the cache end or not.
-     *
-     * @var bool
-     */
-    protected $break      = true;
 
     /**
      * Number of rows.
@@ -104,6 +97,8 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
     public function __construct ( \PDOStatement $statement ) {
 
         $this->setStatement($statement);
+
+        $this->cache = new \SplFixedArray($this->count());
 
         return;
     }
@@ -149,9 +144,8 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
             throw new \Hoa\Database\Exception(
                 '%3$s (%1$s/%2$d)', 0, $this->errorInfo());
 
-        $this->cache = array();
-        $this->break = true;
         $this->count = null;
+        $this->cache = new \SplFixedArray($this->count());
 
         return $this;
     }
@@ -187,11 +181,14 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function rewind ( ) {
 
-        $this->break = empty($this->cache);
-        reset($this->cache);
+        $this->cache->rewind();
 
-        if ($this->break)
-            $this->next();
+        if (   !$this->valid()
+            && $row = $this->fetch())
+            $this->cache->offsetSet(
+                $this->key(),
+                $row
+            );
 
         return;
     }
@@ -204,7 +201,8 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function valid ( ) {
 
-        return (false === $this->break);
+        return (   $this->cache->valid()
+                && null !== $this->current());
     }
 
     /**
@@ -215,7 +213,7 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function current ( ) {
 
-        return current($this->cache);
+        return $this->cache->current();
     }
 
     /**
@@ -226,7 +224,7 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function key ( ) {
 
-        return key($this->cache);
+        return $this->cache->key();
     }
 
     /**
@@ -238,13 +236,14 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function next ( ) {
 
-        if (false === next($this->cache))
-            if ($row = $this->fetch()) {
+        $this->cache->next();
 
-                $this->cache[] = $row;
-                $this->break   = false;
-            } else
-                $this->break   = true;
+        if (   !$this->valid()
+            && $row = $this->fetch())
+            $this->cache->offsetSet(
+                $this->key(),
+                $row
+            );
 
         return;
     }
@@ -258,16 +257,21 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function fetchAll ( ) {
 
-        if (count($this->cache) != $this->count()) {
-            $this->cache = array_merge(
-                $this->cache,
-                $this->getStatement()->fetchAll(\PDO::FETCH_ASSOC)
-            );
+        if (in_array(null, $cache = $this->cache->toArray())) {
+            $rows = $this->getStatement()->fetchAll(\PDO::FETCH_ASSOC);
+
+            foreach ($this->cache as $key => $row)
+                if (null === $row)
+                    $this->cache->offsetSet(
+                        $key,
+                        array_shift($rows)
+                    );
 
             $this->rewind();
+            $cache = $this->cache->toArray();
         }
 
-        return $this->cache;
+        return $cache;
     }
 
     /**
@@ -313,7 +317,8 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
         if (!isset($this->cache[$key = $this->count() - 1]))
             $this->cache[$key] = $this->fetch(\PDO::FETCH_ORI_LAST);
 
-        return end($this->cache);
+        // @todo: move internal pointer of cache to $this->count() - 1
+        return $this->cache[$this->count() - 1];
     }
 
     /**
@@ -344,7 +349,8 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
         if (!isset($this->cache[$previousKey]))
             $this->cache[$previousKey] = $this->fetch(\PDO::FETCH_ORI_PRIOR);
 
-        return prev($this->cache);
+        // @todo: move internal pointer of cache from $this->key() to $this->key() - 1
+        return $this->cache[$previousKey];
     }
 
     /**
