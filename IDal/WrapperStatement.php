@@ -47,7 +47,7 @@ namespace Hoa\Database\IDal {
  * @license    New BSD License
  */
 
-interface WrapperStatement extends \Hoa\Iterator {
+interface WrapperStatement extends \Hoa\Iterator, \Countable {
 
     /**
      * Execute a prepared statement.
@@ -129,15 +129,6 @@ interface WrapperStatement extends \Hoa\Iterator {
      * @throw   \Hoa\Database\Exception
      */
     public function fetchColumn ( $column = 0 );
-
-    /**
-     * Returns the number of rows affected by the last SQL statement
-     *
-     * @access  public
-     * @return  int
-     * @throw   \Hoa\Database\Exception
-     */
-    public function rowCount ( );
 
     /**
      * Close the cursor, enabling the statement to be executed again.

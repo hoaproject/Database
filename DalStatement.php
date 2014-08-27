@@ -282,15 +282,15 @@ class DalStatement implements \Hoa\Database\IDal\WrapperStatement {
     }
 
     /**
-     * Returns the number of rows affected by the last SQL statement
+     * Returns the number of rows affected by the last SQL statement.
      *
      * @access  public
      * @return  int
      * @throw   \Hoa\Database\Exception
      */
-    public function rowCount ( ) {
+    public function count ( ) {
 
-        return $this->getStatement()->rowCount();
+        return $this->getStatement()->count();
     }
 
     /**

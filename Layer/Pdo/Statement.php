@@ -91,7 +91,7 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      *
      * @var int
      */
-    protected $rowCount   = null;
+    protected $count      = null;
 
 
     /**
@@ -149,9 +149,9 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
             throw new \Hoa\Database\Exception(
                 '%3$s (%1$s/%2$d)', 0, $this->errorInfo());
 
-        $this->cache    = array();
-        $this->break    = true;
-        $this->rowCount = null;
+        $this->cache = array();
+        $this->break = true;
+        $this->count = null;
 
         return $this;
     }
@@ -258,7 +258,7 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function fetchAll ( ) {
 
-        if (count($this->cache) != $this->rowCount()) {
+        if (count($this->cache) != $this->count()) {
             $this->cache = array_merge(
                 $this->cache,
                 $this->getStatement()->fetchAll(\PDO::FETCH_ASSOC)
@@ -310,7 +310,7 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
      */
     public function fetchLast ( ) {
 
-        if (!isset($this->cache[$key = $this->rowCount() - 1]))
+        if (!isset($this->cache[$key = $this->count() - 1]))
             $this->cache[$key] = $this->fetch(\PDO::FETCH_ORI_LAST);
 
         return end($this->cache);
@@ -362,18 +362,18 @@ class Statement implements \Hoa\Database\IDal\WrapperStatement {
     }
 
     /**
-     * Returns the number of rows affected by the last SQL statement
+     * Returns the number of rows affected by the last SQL statement.
      *
      * @access  public
      * @return  int
      * @throw   \Hoa\Database\Exception
      */
-    public function rowCount ( ) {
+    public function count ( ) {
 
-        if (null === $this->rowCount)
-            $this->rowCount = $this->getStatement()->rowCount();
+        if (null === $this->count)
+            $this->count = $this->getStatement()->rowCount();
 
-        return $this->rowCount;
+        return $this->count;
     }
 
     /**
