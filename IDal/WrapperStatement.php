@@ -47,7 +47,9 @@ namespace Hoa\Database\IDal {
  * @license    New BSD License
  */
 
-interface WrapperStatement {
+interface WrapperStatement
+    extends \Countable,
+            \Hoa\Iterator {
 
     /**
      * Execute a prepared statement.
@@ -78,7 +80,7 @@ interface WrapperStatement {
      * Return an array containing all of the result set rows.
      *
      * @access  public
-     * @return  array
+     * @return  array[]
      * @throw   \Hoa\Database\Exception
      */
     public function fetchAll ( );
@@ -87,7 +89,7 @@ interface WrapperStatement {
      * Fetch the first row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchFirst ( );
@@ -96,7 +98,7 @@ interface WrapperStatement {
      * Fetch the last row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchLast ( );
@@ -105,7 +107,7 @@ interface WrapperStatement {
      * Fetch the next row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchNext ( );
@@ -114,7 +116,7 @@ interface WrapperStatement {
      * Fetch the previous row in the result set.
      *
      * @access  public
-     * @return  mixed
+     * @return  array
      * @throw   \Hoa\Database\Exception
      */
     public function fetchPrior ( );
