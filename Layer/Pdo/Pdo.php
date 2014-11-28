@@ -58,41 +58,62 @@ class Pdo implements Database\IDal\Wrapper {
      */
     protected $_connection = null;
 
+    protected static $extensionOK = null;
 
+    /**
+     *
+     * @var type
+     */
+    protected $parameters = [];
+
+    const DSN = 0;
+
+    const USERNAME = 1;
+
+    const PASSWORD = 2;
+
+    const OPTIONS = 3;
 
     /**
      * Create a DAL instance, representing a connection to a database.
      *
      * @access  public
-     * @param   string  $dns              The DNS of database.
+     * @param   string  $dsn              The DSN of database.
      * @param   string  $username         The username to connect to database.
      * @param   string  $password         The password to connect to database.
      * @param   array   $driverOptions    The driver options.
      * @return  void
      * @throw   \Hoa\Database\Exception
      */
-    public function __construct ( $dns, $username, $password,
+    public function __construct ( $dsn, $username, $password,
                                   Array $driverOptions = [] ) {
 
-        if(false === extension_loaded('pdo'))
-            throw new Database\Exception(
-                'The module PDO is not enabled.', 0);
+        self::testExtension();
 
-        $connection = null;
-
-        try {
-
-            $connection = new \PDO($dns, $username, $password, $driverOptions);
-        }
-        catch ( \PDOException $e ) {
-
-            throw new Database\Exception(
-                $e->getMessage(), $e->getCode(), null, $e);
-        }
-
-        $this->setConnection($connection);
+        $this->parameters = [
+            self::DSN => $dsn,
+            self::USERNAME => $username,
+            self::PASSWORD => $password,
+            self::OPTIONS => $driverOptions
+        ];
 
         return;
+    }
+
+    /**
+     * Test if the PDO Extension is loaded
+     * Static to prevent the extension_loaded call many times for the same result
+     *
+     * @throws \Hoa\Database\Exception
+     */
+    protected static function testExtension() {
+        if (self::$extensionOK === null) {
+            self::$extensionOK = extension_loaded('pdo');
+        }
+
+        if(false === self::$extensionOK)
+            throw new Database\Exception(
+                'The module PDO is not enabled.', 0);
     }
 
     /**
@@ -119,9 +140,20 @@ class Pdo implements Database\IDal\Wrapper {
      */
     protected function getConnection ( ) {
 
-        if(null === $this->_connection)
-            throw new Database\Exception(
-                'Cannot return a null connection.', 1);
+        if(null === $this->_connection) {
+                try {
+
+                    $connection = new \PDO(
+                        $this->parameters[self::DSN], $this->parameters[self::USERNAME], $this->parameters[self::PASSWORD], $this->parameters[self::OPTIONS]);
+                } catch (\PDOException $e) {
+
+                    throw new Database\Exception(
+                    $e->getMessage(), $e->getCode(), null, $e);
+                }
+
+
+                $this->setConnection($connection);
+        }
 
         return $this->_connection;
     }
