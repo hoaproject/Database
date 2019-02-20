@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -36,13 +38,12 @@
 
 namespace Hoa\Database\Query;
 
+use Hoa\Database\Exception;
+
 /**
  * Class \Hoa\Database\Query\SelectCore.
  *
  * Core of the SELECT query.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 abstract class SelectCore extends Where
 {
@@ -53,12 +54,12 @@ abstract class SelectCore extends Where
      *
      * @var array
      */
-    protected $_columns       = null;
+    protected $_columns       = [];
 
     /**
      * SELECT DISTINCT or SELECT ALL.
      *
-     * @var string
+     * @var ?string
      */
     protected $_distinctOrAll = null;
 
@@ -79,7 +80,7 @@ abstract class SelectCore extends Where
     /**
      * Having expression.
      *
-     * @var string
+     * @var ?string
      */
     protected $_having        = null;
 
@@ -87,8 +88,6 @@ abstract class SelectCore extends Where
 
     /**
      * Set columns.
-     *
-     * @param   array  $columns    Columns.
      */
     public function __construct(array $columns = [])
     {
@@ -99,10 +98,8 @@ abstract class SelectCore extends Where
 
     /**
      * Make a SELECT DISTINCT.
-     *
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function distinct()
+    public function distinct(): self
     {
         $this->_distinctOrAll = 'DISTINCT';
 
@@ -111,10 +108,8 @@ abstract class SelectCore extends Where
 
     /**
      * Make a SELECT ALL.
-     *
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function all()
+    public function all(): self
     {
         $this->_distinctOrAll = 'ALL';
 
@@ -123,14 +118,10 @@ abstract class SelectCore extends Where
 
     /**
      * Select a column.
-     *
-     * @param   string  $column    Column.
-     * @param   ...     ...
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function select($column)
+    public function select(string ...$columns): self
     {
-        foreach (func_get_args() as $column) {
+        foreach ($columns as $column) {
             $this->_columns[] = $column;
         }
 
@@ -139,14 +130,10 @@ abstract class SelectCore extends Where
 
     /**
      * Group by expression.
-     *
-     * @param   string  $expression    Expression.
-     * @param   ...     ...
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function groupBy($expression)
+    public function groupBy(string ...$expressions): self
     {
-        foreach (func_get_args() as $expression) {
+        foreach ($expressions as $expression) {
             $this->_groupBy[] = $expression;
         }
 
@@ -155,11 +142,8 @@ abstract class SelectCore extends Where
 
     /**
      * Having expression.
-     *
-     * @param   string  $expression    Expression.
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function having($expression)
+    public function having(string $expression): self
     {
         $this->_having = $expression;
 
@@ -168,14 +152,10 @@ abstract class SelectCore extends Where
 
     /**
      * Set source (regular or a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @param   ...    ...
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function from($source)
+    public function from(...$sources): self
     {
-        foreach (func_get_args() as $source) {
+        foreach ($sources as $source) {
             if ($source instanceof self) {
                 $source = '(' . $source . ')';
             }
@@ -188,11 +168,8 @@ abstract class SelectCore extends Where
 
     /**
      * Alias the last declared source.
-     *
-     * @param   string  $alias    Alias.
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function _as($alias)
+    public function _as(string $alias): self
     {
         if (empty($this->_from)) {
             return $this;
@@ -205,125 +182,91 @@ abstract class SelectCore extends Where
 
     /**
      * Join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function join($source)
+    public function join($source): Join
     {
         return $this->_join('JOIN', $source);
     }
 
     /**
      * Natural join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function naturalJoin($source)
+    public function naturalJoin($source): Join
     {
         return $this->_join('NATURAL JOIN', $source);
     }
 
     /**
      * Left join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function leftJoin($source)
+    public function leftJoin($source): Join
     {
         return $this->_join('LEFT JOIN', $source);
     }
 
     /**
      * Natural left join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function naturalLeftJoin($source)
+    public function naturalLeftJoin($source): Join
     {
         return $this->_join('NATURAL LEFT JOIN', $source);
     }
 
     /**
      * Left outer join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function leftOuterJoin($source)
+    public function leftOuterJoin($source): Join
     {
         return $this->_join('LEFT OUTER JOIN', $source);
     }
 
     /**
      * Natural left outer join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function naturalLeftOuterJoin($source)
+    public function naturalLeftOuterJoin($source): Join
     {
         return $this->_join('NATURAL LEFT OUTER JOIN', $source);
     }
 
     /**
      * Inner join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function innerJoin($source)
+    public function innerJoin($source): Join
     {
         return $this->_join('INNER JOIN', $source);
     }
 
     /**
      * Natural inner join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function naturalInnerJoin($source)
+    public function naturalInnerJoin($source): Join
     {
         return $this->_join('NATURAL INNER JOIN', $source);
     }
 
     /**
      * Cross join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function crossJoin($source)
+    public function crossJoin($source): Join
     {
         return $this->_join('CROSS JOIN', $source);
     }
 
     /**
      * Natural cross join a source (regular of a SELECT query).
-     *
-     * @param   mixed  $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    public function naturalCrossJoin($source)
+    public function naturalCrossJoin($source): Join
     {
         return $this->_join('NATURAL CROSS JOIN', $source);
     }
 
     /**
      * Make a join.
-     *
-     * @param   string  $type      Type.
-     * @param   mixed   $source    Source.
-     * @return  \Hoa\Database\Query\Join
      */
-    protected function _join($type, $source)
+    protected function _join(string $type, $source): Join
     {
         if (empty($this->_from)) {
-            return $this;
+            throw new Exception('Cannot join if there is no `FROM` set.', 0);
         }
 
         if ($source instanceof self) {
@@ -343,10 +286,8 @@ abstract class SelectCore extends Where
 
     /**
      * Reset some properties.
-     *
-     * @return  \Hoa\Database\Query\SelectCore
      */
-    public function reset()
+    public function reset(): parent
     {
         parent::reset();
         $this->_columns       = [];
@@ -360,10 +301,8 @@ abstract class SelectCore extends Where
 
     /**
      * Generate the query.
-     *
-     * @return  string
      */
-    public function __toString()
+    public function __toString(): string
     {
         $out = 'SELECT';
 

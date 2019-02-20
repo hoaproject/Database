@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -34,18 +36,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Database;
+namespace Hoa\Database\IDal;
 
-use Hoa\Exception as HoaException;
+use Hoa\Iterator;
 
 /**
- * Class \Hoa\Database\Exception.
+ * Interface \Hoa\Database\IDal\WrapperIterator.
  *
- * Extending the \Hoa\Exception\Exception class.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
+ * Interface of a DAL iterator statement wrapper.
  */
-class Exception extends HoaException
+interface WrapperIterator extends Iterator\Iterator
 {
+    /**
+     * Create an iterator instance.
+     */
+    public function __construct($statement, array $style);
 }

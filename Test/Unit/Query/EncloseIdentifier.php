@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Hoa\Test;
  * Class \Hoa\Database\Test\Unit\Query\EncloseIdentifier.
  *
  * Test suite of EncloseIdentifier feature.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class EncloseIdentifier extends Test\Unit\Suite
 {
@@ -126,7 +125,7 @@ class EncloseIdentifier extends Test\Unit\Suite
                     ->groupBy('a')
                     ->having('"a" > 42') // manual enclose
                     ->orderBy('a')
-                    ->limit('2')
+                    ->limit(2)
                     ->offset('1')
             )
             ->then
@@ -154,7 +153,7 @@ class EncloseIdentifier extends Test\Unit\Suite
                     ->groupBy('a')
                     ->having('"a" > 42') // manual enclose
                     ->orderBy('a')
-                    ->limit('2')
+                    ->limit(2)
                     ->offset('1')
             )
             ->then
@@ -182,7 +181,7 @@ class EncloseIdentifier extends Test\Unit\Suite
                     ->groupBy('a')
                     ->having('"a" > 42') // manual enclose
                     ->orderBy('a')
-                    ->limit('2')
+                    ->limit(2)
                     ->offset('1')
             )
             ->then

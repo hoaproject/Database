@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -42,9 +44,6 @@ use Hoa\Database;
  * Class \Hoa\Database\Layer\Pdo\Statement.
  *
  * Wrap PDOStatement.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Statement implements Database\IDal\WrapperStatement
 {
@@ -70,8 +69,6 @@ class Statement implements Database\IDal\WrapperStatement
 
     /**
      * Create a statement instance.
-     *
-     * @param   \PDOStatement  $statement    The PDOStatement instance.
      */
     public function __construct(\PDOStatement $statement)
     {
@@ -82,11 +79,8 @@ class Statement implements Database\IDal\WrapperStatement
 
     /**
      * Set the statement instance.
-     *
-     * @param   \PDOStatement  $statement    The PDOStatement instance.
-     * @return  \PDOStatement
      */
-    protected function setStatement(\PDOStatement $statement)
+    protected function setStatement(\PDOStatement $statement): \PDOStatement
     {
         $old              = $this->_statement;
         $this->_statement = $statement;
@@ -96,23 +90,16 @@ class Statement implements Database\IDal\WrapperStatement
 
     /**
      * Get the statement instance.
-     *
-     * @return  \PDOStatement
      */
-    protected function getStatement()
+    protected function getStatement(): \PDOStatement
     {
         return $this->_statement;
     }
 
     /**
      * Execute a prepared statement.
-     *
-     * @param   array   $bindParameters    Bind parameters values if bindParam
-     *                                     is not called.
-     * @return  \Hoa\Database\Layer\Pdo\Statement
-     * @throws  \Hoa\Database\Exception
      */
-    public function execute(array $bindParameters = null)
+    public function execute(array $bindParameters = null): Database\IDal\WrapperStatement
     {
         if (false === $this->getStatement()->execute($bindParameters)) {
             throw new Database\Exception(
@@ -127,20 +114,13 @@ class Statement implements Database\IDal\WrapperStatement
 
     /**
      * Bind a parameter to te specified variable name.
-     *
-     * @param   mixed   $parameter    Parameter name.
-     * @param   mixed   $value        Parameter value.
-     * @param   int     $type         Type of value.
-     * @param   int     $length       Length of data type.
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
     public function bindParameter(
         $parameter,
         &$value,
-        $type = null,
-        $length = null
-    ) {
+        ?int $type  = null,
+        int $length = null
+    ): bool {
         if (null === $type) {
             return $this->getStatement()->bindParam($parameter, $value);
         }
@@ -154,26 +134,14 @@ class Statement implements Database\IDal\WrapperStatement
 
     /**
      * Set the iterator fetching style.
-     *
-     * @param   int    $offset         This value must be one of the
-     *                                 DalStatement::FROM_* constants or an
-     *                                 arbitrary offset.
-     * @param   int    $orientation    This value must be DalStatement::FORWARD
-     *                                 or DalStatement::BACKWARD constant.
-     * @param   int    $style          This value must be one of the
-     *                                 DalStatement::AS_* constants.
-     * @param   mixed  $arg1           For AS_CLASS: The class name.
-     *                                 For AS_REUSABLE_OBJECT: An object.
-     * @param   array  $arg2           For AS_CLASS: Constructor arguments.
-     * @return  \Hoa\Database\Layer\Pdo\Statement
      */
     public function setFetchingStyle(
-        $offset      = Database\DalStatement::FROM_START,
-        $orientation = Database\DalStatement::FORWARD,
-        $style       = Database\DalStatement::AS_MAP,
-        $arg1        = null,
-        $arg2        = null
-    ) {
+        int $offset      = Database\DalStatement::FROM_START,
+        int $orientation = Database\DalStatement::FORWARD,
+        int $style       = Database\DalStatement::AS_MAP,
+        $arg1            = null,
+        array $arg2      = null
+    ): Database\IDal\WrapperStatement {
         $this->_style[Database\DalStatement::STYLE_OFFSET]      = $offset;
         $this->_style[Database\DalStatement::STYLE_ORIENTATION] = $orientation;
         $this->_style[Database\DalStatement::STYLE_MODE]        = $style;
@@ -190,10 +158,8 @@ class Statement implements Database\IDal\WrapperStatement
 
     /**
      * Get an Iterator.
-     *
-     * @return  \Hoa\Database\Layer\Pdo\Iterator
      */
-    public function getIterator()
+    public function getIterator(): Iterator
     {
         return new Iterator(
             $this->getStatement(),
@@ -203,47 +169,32 @@ class Statement implements Database\IDal\WrapperStatement
 
     /**
      * Return an array containing all of the result set rows.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function fetchAll()
+    public function fetchAll(): array
     {
         return $this->getStatement()->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
      * Fetch the first row in the result set.
-     *
-     * @param   int  $style    Must be one of the DalStatement::AS_* constants.
-     * @return  mixed
      */
-    public function fetchFirst($style = null)
+    public function fetchFirst(int $style = null)
     {
         return $this->fetch($style, \PDO::FETCH_ORI_FIRST);
     }
 
     /**
      * Fetch the last row in the result set.
-     *
-     * @param   int  $style    Must be one of the DalStatement::AS_* constants.
-     * @return  mixed
      */
-    public function fetchLast($style = null)
+    public function fetchLast(int $style = null)
     {
         return $this->fetch($style, \PDO::FETCH_ORI_LAST);
     }
 
     /**
      * Fetch a row in the result set.
-     *
-     * @param   int  $style          Must be one of the DalStatement::AS_*
-     *                               constants.
-     * @param   int  $orientation    Must be one of the \PDO::FETCH_ORI_*
-     *                               constants.
-     * @return  mixed
      */
-    protected function fetch($style, $orientation)
+    protected function fetch(int $style, int $orientation)
     {
         return $this->getStatement()->fetch(
             $style ?: $this->_style,
@@ -254,23 +205,16 @@ class Statement implements Database\IDal\WrapperStatement
     /**
      * Return a single column from the next row of the result set or false if
      * there is no more row.
-     *
-     * @param   int  $column    Column index.
-     * @return  mixed
-     * @throws  \Hoa\Database\Exception
      */
-    public function fetchColumn($column = 0)
+    public function fetchColumn(int $column = 0)
     {
         return $this->getStatement()->fetchColumn($column);
     }
 
     /**
      * Close the cursor, enabling the statement to be executed again.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function closeCursor()
+    public function closeCursor(): bool
     {
         return $this->getStatement()->closeCursor();
     }
@@ -278,11 +222,8 @@ class Statement implements Database\IDal\WrapperStatement
     /**
      * Fetch the SQLSTATE associated with the last operation on the statement
      * handle.
-     *
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorCode()
+    public function errorCode(): string
     {
         return $this->getStatement()->errorCode();
     }
@@ -290,11 +231,8 @@ class Statement implements Database\IDal\WrapperStatement
     /**
      * Fetch extends error information associated with the last operation on the
      * statement handle.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorInfo()
+    public function errorInfo(): array
     {
         return $this->getStatement()->errorInfo();
     }

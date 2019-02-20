@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -37,112 +39,87 @@
 namespace Hoa\Database\Query;
 
 /**
- * Class \Hoa\Database\Query\Where.
+ * Trait \Hoa\Database\Query\EncloseIdentifier.
  *
- * Build a WHERE clause.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
+ * Enclose identifier feature.
  */
-class Where
+trait EncloseIdentifier
 {
     /**
-     * Expressions.
+     * State of the enclosing: Either true for enable the enclosing feature
+     * or false for disable it.
      *
-     * @var array
+     * @var bool
      */
-    protected $_where         = [];
+    protected $_enableEnclose = false;
 
     /**
-     * Current logic operator.
+     * Enclose opening symbol.
      *
      * @var string
      */
-    protected $_logicOperator = null;
+    protected $_openingSymbol = '"';
+
+    /**
+     * Enclose closing symbol.
+     *
+     * @var string
+     */
+    protected $_closingSymbol = '"';
 
 
 
     /**
-     * Add an expression (regular string or a WHERE clause).
-     *
-     * @param   mixed  $expression    Expression.
-     * @return  \Hoa\Database\Query\Where
+     * Set enclose symbols.
      */
-    public function where($expression)
+    public function setEncloseSymbol(string $openingSymbol, string $closingSymbol = null): Dml
     {
-        $where = null;
-
-        if (!empty($this->_where)) {
-            $where = ($this->_logicOperator ?: 'AND') . ' ';
-        }
-
-        if ($expression instanceof self) {
-            $expression = '(' . substr($expression, 7) . ')';
-        }
-
-        $this->_where[]       = $where . $expression;
-        $this->_logicOperator = null;
+        $this->_openingSymbol = $openingSymbol;
+        $this->_closingSymbol = $closingSymbol ?: $openingSymbol;
 
         return $this;
     }
 
     /**
-     * Redirect undefined calls to _calls.
-     *
-     * @param   string  $name      Name.
-     * @param   array   $values    Values.
-     * @return  \Hoa\Database\Query\Where
+     * Enable or disable enclosing identifiers.
      */
-    public function __call($name, array $values)
+    public function enableEncloseIdentifier(bool $enable = true): bool
     {
-        return call_user_func_array([$this, '_' . $name], $values);
+        $old                  = $this->_enableEnclose;
+        $this->_enableEnclose = $enable;
+
+        return $old;
     }
 
     /**
-     * Set the current logic operator.
-     *
-     * @param   string  $name   Name.
-     * @return  \Hoa\Database\Query\Where
+     * Enclose identifiers with defined symbol.
      */
-    public function __get($name)
+    protected function enclose($identifiers)
     {
-        switch (strtolower($name)) {
-            case 'and':
-            case 'or':
-                $this->_logicOperator = strtoupper($name);
-
-                break;
-
-            default:
-                return $this->$name;
+        if (false === $this->_enableEnclose) {
+            return $identifiers;
         }
 
-        return $this;
-    }
-
-    /**
-     * Reset.
-     *
-     * @return  \Hoa\Database\Query\Where
-     */
-    public function reset()
-    {
-        $this->_where = [];
-
-        return $this;
-    }
-
-    /**
-     * Generate the query.
-     *
-     * @return  string
-     */
-    public function __toString()
-    {
-        if (empty($this->_where)) {
-            return null;
+        if (false === is_array($identifiers)) {
+            return $this->_enclose($identifiers);
         }
 
-        return ' WHERE ' . implode(' ', $this->_where);
+        foreach ($identifiers as &$identifier) {
+            $identifier = $this->_enclose($identifier);
+        }
+
+        return $identifiers;
+    }
+
+    /**
+     * Enclose identifier with defined symbol.
+     */
+    protected function _enclose(string $identifier): string
+    {
+        if (0 === preg_match('#\s|\(#', $identifier)) {
+            return $this->_openingSymbol . $identifier . $this->_closingSymbol;
+        }
+
+        return $identifier;
     }
 }

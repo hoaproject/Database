@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -37,75 +39,24 @@
 namespace Hoa\Database\Query;
 
 /**
- * Class \Hoa\Database\Query\Join.
+ * Interface \Hoa\Database\Query\Dml.
  *
- * Build a JOIN clause.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
+ * Represent Data Manipulation Language queries.
  */
-class Join
+interface Dml
 {
     /**
-     * Parent query.
-     *
-     * @var \Hoa\Database\Query\Select
+     * Set enclose symbols.
      */
-    protected $_parent = null;
+    public function setEncloseSymbol(string $openingSymbol, string $closingSymbol = null): Dml;
 
     /**
-     * Reference the FROM entry of the parent (simulate “friends”).
-     *
-     * @var string
+     * Enable or disable enclosing identifiers.
      */
-    protected $_from   = null;
-
-
+    public function enableEncloseIdentifier(bool $enable = true): bool;
 
     /**
-     * Constructor.
-     *
-     * @param   \Hoa\Database\Query\Select  $parent    Parent query.
-     * @param   array                       $from      FROM entry (“friends”).
+     * Generate the query.
      */
-    public function __construct(Select $parent, array &$from)
-    {
-        $this->_parent = $parent;
-        $this->_from   = &$from;
-        end($this->_from);
-
-        return;
-    }
-
-    /**
-     * Declare the JOIN constraint ON.
-     *
-     * @param   string  $expression    Expression.
-     * @return  \Hoa\Database\Query\Select
-     */
-    public function on($expression)
-    {
-        $this->_from[key($this->_from)] =
-            current($this->_from) .
-            ' ON ' . $expression;
-
-        return $this->_parent;
-    }
-
-    /**
-     * Declare the JOIN constraint USING.
-     *
-     * @param   string  $expression    Expression.
-     * @param   ...     ...
-     * @return  \Hoa\Database\Query\Select
-     */
-    public function using($expression)
-    {
-        $this->_from[key($this->_from)] =
-            current($this->_from) .
-            ' USING (' .
-            implode(', ', func_get_args()) . ')';
-
-        return $this->_parent;
-    }
+    public function __toString(): string;
 }

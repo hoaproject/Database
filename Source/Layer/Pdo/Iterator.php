@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -42,9 +44,6 @@ use Hoa\Database;
  * Class \Hoa\Database\Layer\Pdo\Iterator.
  *
  * Iterator Statement.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Iterator implements Database\IDal\WrapperIterator
 {
@@ -73,11 +72,8 @@ class Iterator implements Database\IDal\WrapperIterator
 
     /**
      * Create an iterator instance.
-     *
-     * @param   object  $statement    The underlying statement instance.
-     * @param   array   $style        An array of fetching style options.
      */
-    public function __construct($statement, $style)
+    public function __construct(\PDOStatement $statement, array $style)
     {
         $this->_statement = $statement;
         $this->_style     = $style;
@@ -111,28 +107,22 @@ class Iterator implements Database\IDal\WrapperIterator
 
     /**
      * Get the statement instance.
-     *
-     * @return  \PDOStatement
      */
-    protected function getStatement()
+    protected function getStatement(): \PDOStatement
     {
         return $this->_statement;
     }
 
     /**
      * Return the current element.
-     *
-     * @return  array
      */
-    public function current()
+    public function current(): array
     {
         return $this->_row;
     }
 
     /**
      * Move forward to next element.
-     *
-     * @return  void
      */
     public function next()
     {
@@ -146,8 +136,6 @@ class Iterator implements Database\IDal\WrapperIterator
 
     /**
      * Return always null.
-     *
-     * @return  null
      */
     public function key()
     {
@@ -156,18 +144,14 @@ class Iterator implements Database\IDal\WrapperIterator
 
     /**
      * Checks if current position is valid.
-     *
-     * @return  bool
      */
-    public function valid()
+    public function valid() : bool
     {
         return false !== $this->_row;
     }
 
     /**
      * Rewind the iterator to the first element.
-     *
-     * @return  void
      */
     public function rewind()
     {

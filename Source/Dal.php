@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -44,9 +46,6 @@ use Hoa\Zformat;
  * Class \Hoa\Database\Dal.
  *
  * The higher class of the Database Abstract Layer. It wrappes all DAL.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Dal implements Zformat\Parameterizable, Event\Source
 {
@@ -102,14 +101,14 @@ class Dal implements Zformat\Parameterizable, Event\Source
     /**
      * The layer instance.
      *
-     * @var \Hoa\Database\IDal\Wrapper
+     * @var ?IDal\Wrapper
      */
     protected $_layer                = null;
 
     /**
      * Parameter of \Hoa\Database\Dal.
      *
-     * @var \Hoa\Zformat\Parameter
+     * @var ?Zformat\Parameter
      */
     protected static $_parameters    = null;
 
@@ -125,8 +124,6 @@ class Dal implements Zformat\Parameterizable, Event\Source
     /**
      * Create a DAL instance, representing a connection to a database.
      * The constructor is private to make a multiton.
-     *
-     * @param   array   $connectionParameters    The layer connection parameter.
      */
     private function __construct(array $connectionParameters)
     {
@@ -143,9 +140,6 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Initialize parameters.
-     *
-     * @param   array  $parameters    Parameters.
-     * @return  void
      */
     public static function initializeParameters(array $parameters = [])
     {
@@ -172,24 +166,15 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Make a multiton on the $id.
-     *
-     * @param   string  $id               The instance ID.
-     * @param   string  $dalName          The database abstract layer name.
-     * @param   string  $dsn              The DSN of database.
-     * @param   string  $username         The username to connect to database.
-     * @param   string  $password         The password to connect to database.
-     * @param   array   $driverOptions    The driver options.
-     * @return  \Hoa\Database\Dal
-     * @throws  \Hoa\Database\Exception
      */
     public static function getInstance(
-        $id,
-        $dalName             = null,
-        $dsn                 = null,
-        $username            = null,
-        $password            = null,
+        string $id,
+        string $dalName             = null,
+        string $dsn                 = null,
+        string $username            = null,
+        string $password            = null,
         array $driverOptions = []
-    ) {
+    ): self {
         if (null === self::$_parameters) {
             self::initializeParameters();
         }
@@ -236,11 +221,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
      * Get the last instance of a DAL, i.e. the last used singleton.
      * If no instance was set but if the connection.autoload parameter is set,
      * then we auto-connect (autoload) a connection.
-     *
-     * @return  \Hoa\Database\IDal\Wrapper
-     * @throws  \Hoa\Database\Exception
      */
-    public static function getLastInstance()
+    public static function getLastInstance(): IDal\Wrapper
     {
         if (null === self::$_parameters) {
             self::initializeParameters();
@@ -268,18 +250,14 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Get parameters.
-     *
-     * @return  \Hoa\Zformat\Parameter
      */
-    public function getParameters()
+    public function getParameters(): ?Zformat\Parameter
     {
         return self::$_parameters;
     }
 
     /**
      * Open a connection to the database.
-     *
-     * @return  void
      */
     private function open()
     {
@@ -320,10 +298,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Close connection to the database.
-     *
-     * @return  bool
      */
-    public function close()
+    public function close(): bool
     {
         $id    = $this->getId();
         $event = 'hoa://Event/Database/' . $id;
@@ -346,11 +322,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Set database abstract layer instance.
-     *
-     * @param   \Hoa\Database\IDal\Wrapper  $dal    The DAL instance.
-     * @return  \Hoa\Database\IDal\Wrapper
      */
-    protected function setDal(IDal\Wrapper $dal)
+    protected function setDal(IDal\Wrapper $dal): ?IDal\Wrapper
     {
         $old          = $this->_layer;
         $this->_layer = $dal;
@@ -360,10 +333,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Get the database abstract layer instance.
-     *
-     * @return  \Hoa\Database\IDal\Wrapper
      */
-    protected function getDal()
+    protected function getDal(): ?IDal\Wrapper
     {
         if (null === $this->_layer) {
             $this->open();
@@ -374,46 +345,32 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Initiate a transaction.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function beginTransaction()
+    public function beginTransaction(): bool
     {
         return $this->getDal()->beginTransaction();
     }
 
     /**
      * Commit a transaction.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function commit()
+    public function commit(): bool
     {
         return $this->getDal()->commit();
     }
 
     /**
      * Roll back a transaction.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function rollBack()
+    public function rollBack(): bool
     {
         return $this->getDal()->rollBack();
     }
 
     /**
      * Return the ID of the last inserted row or sequence value.
-     *
-     * @param   string  $name    Name of sequence object (needed for some
-     *                           driver).
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function lastInsertId($name = null)
+    public function lastInsertId(string $name = null): string
     {
         if (null === $name) {
             return $this->getDal()->lastInsertId();
@@ -424,15 +381,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Prepare a statement for execution and returns a statement object.
-     *
-     * @param   string  $statement    This must be a valid SQL statement for the
-     *                                target database server.
-     * @param   array   $options      Options to set attributes values for the
-     *                                layer statement.
-     * @return  \Hoa\Database\DalStatement
-     * @throws  \Hoa\Database\Exception
      */
-    public function prepare($statement, array $options = [])
+    public function prepare(string $statement, array $options = []): DalStatement
     {
         return new DalStatement(
             $this->getDal()->prepare(
@@ -443,14 +393,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Quote a string for use in a query.
-     *
-     * @param   string  $string    The string to be quoted.
-     * @param   int     $type      Provide a data type hint for drivers that
-     *                             have alternate quoting styles.
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function quote($string = null, $type = -1)
+    public function quote(?string $string, int $type = -1): string
     {
         if ($type < 0) {
             return $this->getDal()->quote($string);
@@ -462,12 +406,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
     /**
      * Execute an SQL statement, returning a result set as a
      * \Hoa\Database\DalStatement object.
-     *
-     * @param   string  $statement    The SQL statement to prepare and execute.
-     * @return  \Hoa\Database\DalStatement
-     * @throws  \Hoa\Database\Exception
      */
-    public function query($statement)
+    public function query(string $statement): DalStatement
     {
         return new DalStatement(
             $this->getDal()->query($statement)
@@ -477,11 +417,8 @@ class Dal implements Zformat\Parameterizable, Event\Source
     /**
      * Fetch the SQLSTATE associated with the last operation on the database
      * handle.
-     *
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorCode()
+    public function errorCode(): string
     {
         return $this->getDal()->errorCode();
     }
@@ -489,45 +426,30 @@ class Dal implements Zformat\Parameterizable, Event\Source
     /**
      * Fetch extends error information associated with the last operation on the
      * database handle.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorInfo()
+    public function errorInfo(): array
     {
         return $this->getDal()->errorInfo();
     }
 
     /**
      * Return an array of available drivers.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function getAvailableDrivers()
+    public function getAvailableDrivers(): array
     {
         return $this->getDal()->getAvailableDrivers();
     }
 
     /**
      * Set attributes.
-     *
-     * @param   array  $attributes    Attributes values.
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function setAttributes(array $attributes)
+    public function setAttributes(array $attributes): array
     {
         return $this->getDal()->setAttributes($attributes);
     }
 
     /**
      * Set a specific attribute.
-     *
-     * @param   mixed   $attribute    Attribute name.
-     * @param   mixed   $value        Attribute value.
-     * @return  mixed
-     * @throws  \Hoa\Database\Exception
      */
     public function setAttribute($attribute, $value)
     {
@@ -536,33 +458,24 @@ class Dal implements Zformat\Parameterizable, Event\Source
 
     /**
      * Retrieve all database connection attributes.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->getDal()->getAttributes();
     }
 
     /**
      * Retrieve a database connection attribute.
-     *
-     * @param   string  $attribute    Attribute name.
-     * @return  mixed
-     * @throws  \Hoa\Database\Exception
      */
-    public function getAttribute($attribute)
+    public function getAttribute(string $attribute)
     {
         return $this->getDal()->getAttribute($attribute);
     }
 
     /**
      * Get current ID.
-     *
-     * @return  string
      */
-    public function getId()
+    public function getId(): string
     {
         return $this->__id;
     }
