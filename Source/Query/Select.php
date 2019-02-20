@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -40,9 +42,6 @@ namespace Hoa\Database\Query;
  * Class \Hoa\Database\Query\Select.
  *
  * Build a SELECT query.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Select extends SelectCore implements Dml
 {
@@ -70,7 +69,7 @@ class Select extends SelectCore implements Dml
     /**
      * Offset expression.
      *
-     * @var string
+     * @var ?string
      */
     protected $_offset  = null;
 
@@ -78,51 +77,40 @@ class Select extends SelectCore implements Dml
 
     /**
      * Start a new SELECT query which is an union of the previous one.
-     *
-     * @return  \Hoa\Database\Query\Select
      */
-    public function union()
+    public function union(): self
     {
         return $this->compose('UNION');
     }
 
     /**
      * Start a new SELECT query which is an unionAll of the previous one.
-     *
-     * @return  \Hoa\Database\Query\Select
      */
-    public function unionAll()
+    public function unionAll(): self
     {
         return $this->compose('UNION ALL');
     }
 
     /**
      * Start a new SELECT query which is an intersection of the previous one.
-     *
-     * @return  \Hoa\Database\Query\Select
      */
-    public function intersect()
+    public function intersect(): self
     {
         return $this->compose('INTERSECT');
     }
 
     /**
      * Start a new SELECT query which is an exception of the previous one.
-     *
-     * @return  \Hoa\Database\Query\Select
      */
-    public function except()
+    public function except(): self
     {
         return $this->compose('EXCEPT');
     }
 
     /**
      * Compose SELECT queries.
-     *
-     * @param   string  $operator    Composition operator.
-     * @return  \Hoa\Database\Query\Select
      */
-    protected function compose($operator)
+    protected function compose(string $operator): self
     {
         $this->_select[] = parent::__toString() . ' ' . $operator;
         $this->reset();
@@ -132,14 +120,10 @@ class Select extends SelectCore implements Dml
 
     /**
      * Add ordering terms.
-     *
-     * @param   string  $term    Term.
-     * @param   ...     ...
-     * @return  \Hoa\Database\Query\Select
      */
-    public function orderBy($term)
+    public function orderBy(string ...$terms): self
     {
-        foreach (func_get_args() as $term) {
+        foreach ($terms as $term) {
             $this->_orderBy[] = $term;
         }
 
@@ -148,14 +132,10 @@ class Select extends SelectCore implements Dml
 
     /**
      * Add limit expressions.
-     *
-     * @param   string  $expression    Expression.
-     * @param   ...     ...
-     * @return  \Hoa\Database\Query\Select
      */
-    public function limit($expression)
+    public function limit(int ...$expressions): self
     {
-        foreach (func_get_args() as $expression) {
+        foreach ($expressions as $expression) {
             $this->_limit[] = $expression;
         }
 
@@ -164,11 +144,8 @@ class Select extends SelectCore implements Dml
 
     /**
      * Add offset expression.
-     *
-     * @param   string  $expression    Expression.
-     * @return  \Hoa\Database\Query\Select
      */
-    public function offset($expression)
+    public function offset(string $expression): self
     {
         $this->_offset = $expression;
 
@@ -177,12 +154,10 @@ class Select extends SelectCore implements Dml
 
     /**
      * Generate the query.
-     *
-     * @return  string
      */
-    public function __toString()
+    public function __toString(): string
     {
-        $out    = null;
+        $out    = '';
         $select = implode(' ', $this->_select);
 
         if (!empty($select)) {

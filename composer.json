@@ -24,21 +24,22 @@
         "source": "https://central.hoa-project.net/Resource/Library/Database"
     },
     "require": {
-        "php"            : ">=5.5.0",
-        "hoa/consistency": "~1.0",
-        "hoa/event"      : "~1.0",
-        "hoa/exception"  : "~1.0",
-        "hoa/iterator"   : "~2.0",
-        "hoa/protocol"   : "~1.0",
-        "hoa/zformat"    : "~1.0",
+        "php"            : ">=7.1",
+        "hoa/consistency": "dev-master",
+        "hoa/event"      : "dev-master",
+        "hoa/exception"  : "dev-master",
+        "hoa/iterator"   : "dev-master",
+        "hoa/protocol"   : "dev-master",
+        "hoa/zformat"    : "dev-master",
         "ext-pdo"        : "*"
     },
     "require-dev": {
-        "hoa/test": "~2.0"
+        "hoa/test": "dev-master"
     },
     "autoload": {
         "psr-4": {
-            "Hoa\\Database\\": "."
+            "Hoa\\Database\\"      : "Source",
+            "Hoa\\Database\\Test\\": "Test"
         }
     },
     "extra": {

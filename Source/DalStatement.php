@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -40,9 +42,6 @@ namespace Hoa\Database;
  * Class \Hoa\Database\DalStatement.
  *
  * The higher class that represents a DAL statement.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class DalStatement implements IDal\WrapperStatement
 {
@@ -185,7 +184,7 @@ class DalStatement implements IDal\WrapperStatement
     /**
      * The statement instance.
      *
-     * @var \Hoa\Database\IDal\WrapperStatement
+     * @var IDal\WrapperStatement
      */
     protected $statement = null;
 
@@ -193,10 +192,6 @@ class DalStatement implements IDal\WrapperStatement
 
     /**
      * Create a statement instance.
-     *
-     * @param   \Hoa\Database\IDal\WrapperStatement  $statement    The
-     *                                                             statement
-     *                                                             instance.
      */
     public function __construct(IDal\WrapperStatement $statement)
     {
@@ -207,13 +202,8 @@ class DalStatement implements IDal\WrapperStatement
 
     /**
      * Set the statement instance.
-     *
-     * @param   \Hoa\Database\IDal\WrapperStatement  $statement    The
-     *                                                             statement
-     *                                                             instance.
-     * @return  \Hoa\Database\IDal\WrapperStatement
      */
-    protected function setStatement(IDal\WrapperStatement $statement)
+    protected function setStatement(IDal\WrapperStatement $statement): ?IDal\WrapperStatement
     {
         $old             = $this->statement;
         $this->statement = $statement;
@@ -223,23 +213,16 @@ class DalStatement implements IDal\WrapperStatement
 
     /**
      * Get the statement instance.
-     *
-     * @return  \Hoa\Database\IDal\WrapperStatement
      */
-    protected function getStatement()
+    protected function getStatement(): IDal\WrapperStatement
     {
         return $this->statement;
     }
 
     /**
      * Execute a prepared statement.
-     *
-     * @param   array   $bindParameters    Bind parameters values if bindParam is
-     *                                     not called.
-     * @return  \Hoa\Database\DalStatement
-     * @throws  \Hoa\Database\Exception
      */
-    public function execute(array $bindParameters = [])
+    public function execute(array $bindParameters = []): self
     {
         if (empty($bindParameters)) {
             return $this->getStatement()->execute();
@@ -252,20 +235,13 @@ class DalStatement implements IDal\WrapperStatement
 
     /**
      * Bind a parameter to te specified variable name.
-     *
-     * @param   mixed   $parameter    Parameter name.
-     * @param   mixed   $value        Parameter value.
-     * @param   int     $type         Type of value.
-     * @param   int     $length       Length of data type.
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
     public function bindParameter(
         $parameter,
         &$value,
-        $type = null,
-        $length = null
-    ) {
+        ?int $type   = null,
+        int  $length = null
+    ) : bool {
         if (null === $type) {
             return $this->getStatement()->bindParameter($parameter, $value);
         }
@@ -288,37 +264,22 @@ class DalStatement implements IDal\WrapperStatement
 
     /**
      * Return an array containing all of the result set rows.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function fetchAll()
+    public function fetchAll(): array
     {
         return $this->getStatement()->fetchAll();
     }
 
     /**
      * Set the iterator fetching style.
-     *
-     * @param   int    $offset         This value must be one of the
-     *                                 DalStatement::FROM_* constants or an
-     *                                 arbitrary offset.
-     * @param   int    $orientation    This value must be DalStatement::FORWARD
-     *                                 or DalStatement::BACKWARD constant.
-     * @param   int    $style          This value must be one of the
-     *                                 DalStatement::AS_* constants.
-     * @param   mixed  $arg1           For AS_CLASS: The class name.
-     *                                 For AS_REUSABLE_OBJECT: An object.
-     * @param   array  $arg2           For AS_CLASS: Constructor arguments.
-     * @return  \Hoa\Database\DalStatement
      */
     public function setFetchingStyle(
-        $offset      = self::FROM_START,
-        $orientation = self::FORWARD,
-        $style       = self::AS_MAP,
-        $arg1        = null,
-        $arg2        = null
-    ) {
+        int $offset      = self::FROM_START,
+        int $orientation = self::FORWARD,
+        int $style       = self::AS_MAP,
+        $arg1            = null,
+        array $arg2      = null
+    ): self {
         $this->getStatement()->setFetchingStyle(
             $offset,
             $orientation,
@@ -332,32 +293,24 @@ class DalStatement implements IDal\WrapperStatement
 
     /**
      * Get an Iterator.
-     *
-     * @return  \Hoa\Database\IDal\WrapperIterator
      */
-    public function getIterator()
+    public function getIterator(): IDal\WrapperIterator
     {
         return $this->getStatement()->getIterator();
     }
 
     /**
      * Fetch the first row in the result set.
-     *
-     * @param   int  $style    Must be one of the DalStatement::AS_* constants.
-     * @return  mixed
      */
-    public function fetchFirst($style = null)
+    public function fetchFirst(int $style = null)
     {
         return $this->getStatement()->fetchFirst($style);
     }
 
     /**
      * Fetch the last row in the result set.
-     *
-     * @param   int  $style    Must be one of the DalStatement::AS_* constants.
-     * @return  mixed
      */
-    public function fetchLast($style = null)
+    public function fetchLast(int $style = null)
     {
         return $this->getStatement()->fetchLast($style);
     }
@@ -365,23 +318,16 @@ class DalStatement implements IDal\WrapperStatement
     /**
      * Return a single column from the next row of the result set or false if
      * there is no more row.
-     *
-     * @param   int  $column    Column index.
-     * @return  mixed
-     * @throws  \Hoa\Database\Exception
      */
-    public function fetchColumn($column = 0)
+    public function fetchColumn(int $column = 0)
     {
         return $this->getStatement()->fetchColumn($column);
     }
 
     /**
      * Close the cursor, enabling the statement to be executed again.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function closeCursor()
+    public function closeCursor(): bool
     {
         return $this->getStatement()->closeCursor();
     }
@@ -389,11 +335,8 @@ class DalStatement implements IDal\WrapperStatement
     /**
      * Fetch the SQLSTATE associated with the last operation on the statement
      * handle.
-     *
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorCode()
+    public function errorCode(): string
     {
         return $this->getStatement()->errorCode();
     }
@@ -401,11 +344,8 @@ class DalStatement implements IDal\WrapperStatement
     /**
      * Fetch extends error information associated with the last operation on the
      * statement handle.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorInfo()
+    public function errorInfo(): array
     {
         return $this->getStatement()->errorInfo();
     }

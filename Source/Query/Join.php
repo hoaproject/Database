@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -37,36 +39,62 @@
 namespace Hoa\Database\Query;
 
 /**
- * Interface \Hoa\Database\Query\Dml.
+ * Class \Hoa\Database\Query\Join.
  *
- * Represent Data Manipulation Language queries.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
+ * Build a JOIN clause.
  */
-interface Dml
+class Join
 {
     /**
-     * Set enclose symbols.
+     * Parent query.
      *
-     * @param   string  $openingSymbol    Opening symbol.
-     * @param   string  $closingSymbol    Closing symbol.
-     * @return  \Hoa\Database\Query\Dml
+     * @var ?Select
      */
-    public function setEncloseSymbol($openingSymbol, $closingSymbol = null);
+    protected $_parent = null;
 
     /**
-     * Enable or disable enclosing identifiers.
+     * Reference the FROM entry of the parent (simulate “friends”).
      *
-     * @param   bool  $enable    Enable or disable.
-     * @return  \Hoa\Database\Query\Dml
+     * @var array
      */
-    public function enableEncloseIdentifier($enable = true);
+    protected $_from   = null;
+
+
 
     /**
-     * Generate the query.
-     *
-     * @return  string
+     * Constructor.
      */
-    public function __toString();
+    public function __construct(Select $parent, ?array &$from)
+    {
+        $this->_parent = $parent;
+        $this->_from   = &$from;
+        end($this->_from);
+
+        return;
+    }
+
+    /**
+     * Declare the JOIN constraint ON.
+     */
+    public function on(string $expression): Select
+    {
+        $this->_from[key($this->_from)] =
+            current($this->_from) .
+            ' ON ' . $expression;
+
+        return $this->_parent;
+    }
+
+    /**
+     * Declare the JOIN constraint USING.
+     */
+    public function using(string ...$expressions) : Select
+    {
+        $this->_from[key($this->_from)] =
+            current($this->_from) .
+            ' USING (' .
+            implode(', ', $expressions) . ')';
+
+        return $this->_parent;
+    }
 }

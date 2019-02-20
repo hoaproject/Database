@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Hoa\Database;
  * Class \Hoa\Database\Layer\Pdo.
  *
  * Wrap PDO.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Pdo implements Database\IDal\Wrapper
 {
@@ -60,17 +59,11 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Create a DAL instance, representing a connection to a database.
-     *
-     * @param   string  $dsn              The DSN of database.
-     * @param   string  $username         The username to connect to database.
-     * @param   string  $password         The password to connect to database.
-     * @param   array   $driverOptions    The driver options.
-     * @throws  \Hoa\Database\Exception
      */
     public function __construct(
-        $dsn,
-        $username,
-        $password,
+        string $dsn,
+        string $username,
+        string $password,
         array $driverOptions = []
     ) {
         if (false === extension_loaded('pdo')) {
@@ -100,11 +93,8 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Set the connection.
-     *
-     * @param   \PDO        $connection    The PDO instance.
-     * @return  \PDO
      */
-    protected function setConnection(\PDO $connection)
+    protected function setConnection(\PDO $connection): \PDO
     {
         $old               = $this->_connection;
         $this->_connection = $connection;
@@ -114,11 +104,8 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Get the connection instance.
-     *
-     * @return  \PDO
-     * @throws  \Hoa\Database\Exception
      */
-    protected function getConnection()
+    protected function getConnection(): \PDO
     {
         if (null === $this->_connection) {
             throw new Database\Exception(
@@ -132,46 +119,32 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Initiate a transaction.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function beginTransaction()
+    public function beginTransaction(): bool
     {
         return $this->getConnection()->beginTransaction();
     }
 
     /**
      * Commit a transaction.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function commit()
+    public function commit(): bool
     {
         return $this->getConnection()->commit();
     }
 
     /**
      * Roll back a transaction.
-     *
-     * @return  bool
-     * @throws  \Hoa\Database\Exception
      */
-    public function rollBack()
+    public function rollBack(): bool
     {
         return $this->getConnection()->rollBack();
     }
 
     /**
      * Return the ID of the last inserted row or sequence value.
-     *
-     * @param   string  $name    Name of sequence object (needed for some
-     *                           driver).
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function lastInsertId($name = null)
+    public function lastInsertId(string $name = null): string
     {
         if (null === $name) {
             return $this->getConnection()->lastInsertId();
@@ -182,15 +155,8 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Prepare a statement for execution and returns a statement object.
-     *
-     * @param   string  $statement    This must be a valid SQL statement for the
-     *                                target database server.
-     * @param   array   $options      Options to set attributes values for the
-     *                                Layer Statement.
-     * @return  \Hoa\Database\Layer\Pdo\Statement
-     * @throws  \Hoa\Database\Exception
      */
-    public function prepare($statement, array $options = [])
+    public function prepare(string $statement, array $options = []): Database\IDal\WrapperStatement
     {
         if (!isset($options[\PDO::ATTR_CURSOR])) {
             try {
@@ -217,14 +183,8 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Quote a sting for use in a query.
-     *
-     * @param   string  $string    The string to be quoted.
-     * @param   int     $type      Provide a data type hint for drivers that
-     *                             have alternate quoting styles.
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function quote($string = null, $type = -1)
+    public function quote(?string $string, int $type = -1): string
     {
         if ($type < 0) {
             return $this->getConnection()->quote($string);
@@ -236,12 +196,8 @@ class Pdo implements Database\IDal\Wrapper
     /**
      * Execute an SQL statement, returning a result set as a
      * \Hoa\Database\Layer\Pdo\Statement object.
-     *
-     * @param   string  $statement    The SQL statement to prepare and execute.
-     * @return  \Hoa\Database\Layer\Pdo\Statement
-     * @throws  \Hoa\Database\Exception
      */
-    public function query($statement)
+    public function query(string $statement): Database\IDal\WrapperStatement
     {
         $handle = $this->getConnection()->query($statement);
 
@@ -259,11 +215,8 @@ class Pdo implements Database\IDal\Wrapper
     /**
      * Fetch the SQLSTATE associated with the last operation on the database
      * handle.
-     *
-     * @return  string
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorCode()
+    public function errorCode(): string
     {
         return $this->getConnection()->errorCode();
     }
@@ -271,34 +224,24 @@ class Pdo implements Database\IDal\Wrapper
     /**
      * Fetch extends error information associated with the last operation on the
      * database handle.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function errorInfo()
+    public function errorInfo(): array
     {
         return $this->getConnection()->errorInfo();
     }
 
     /**
      * Return an array of available drivers.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function getAvailableDrivers()
+    public function getAvailableDrivers(): array
     {
         return $this->getConnection()->getAvailableDrivers();
     }
 
     /**
      * Set attributes.
-     *
-     * @param   array   $attributes    Attributes values.
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function setAttributes(array $attributes)
+    public function setAttributes(array $attributes): array
     {
         $out = true;
 
@@ -311,11 +254,6 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Set a specific attribute.
-     *
-     * @param   mixed   $attribute    Attribute name.
-     * @param   mixed   $value        Attribute value.
-     * @return  mixed
-     * @throws  \Hoa\Database\Exception
      */
     public function setAttribute($attribute, $value)
     {
@@ -324,11 +262,8 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Retrieve all database connection attributes.
-     *
-     * @return  array
-     * @throws  \Hoa\Database\Exception
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         $out        = [];
         $attributes = [
@@ -355,12 +290,8 @@ class Pdo implements Database\IDal\Wrapper
 
     /**
      * Retrieve a database connection attribute.
-     *
-     * @param   string  $attribute    Attribute name.
-     * @return  mixed
-     * @throws  \Hoa\Database\Exception
      */
-    public function getAttribute($attribute)
+    public function getAttribute(string $attribute)
     {
         return
             $this
@@ -372,4 +303,4 @@ class Pdo implements Database\IDal\Wrapper
 /**
  * Flex entity.
  */
-Consistency::flexEntity('Hoa\Database\Layer\Pdo\Pdo');
+Consistency::flexEntity(Pdo::class);

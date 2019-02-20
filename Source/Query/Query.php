@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -42,9 +44,6 @@ use Hoa\Consistency;
  * Class \Hoa\Database\Query.
  *
  * Multiton of queries.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Query
 {
@@ -58,7 +57,7 @@ class Query
     /**
      * Current instance ID.
      *
-     * @var string
+     * @var ?string
      */
     protected $_id             = null;
 
@@ -66,11 +65,8 @@ class Query
 
     /**
      * Set current instance ID.
-     *
-     * @param   string  $id    ID.
-     * @return  \Hoa\Database\Query
      */
-    public function setId($id)
+    public function setId(string $id): self
     {
         $this->_id = $id;
 
@@ -79,63 +75,48 @@ class Query
 
     /**
      * Get current instance ID.
-     *
-     * @return  string
      */
-    public function getId()
+    public function getId(): ?string
     {
         return $this->_id;
     }
 
     /**
      * Start a START query.
-     *
-     * @param   string  $column    Column.
-     * @param   ...     ...
-     * @return  \Hoa\Database\Query\Select
      */
-    public function select($column = null)
+    public function select(string ...$columns): Select
     {
-        return $this->store(new Select(func_get_args()));
+        return $this->store(new Select($columns));
     }
 
     /**
      * Start an INSERT query.
-     *
-     * @return  \Hoa\Database\Query\Insert
      */
-    public function insert()
+    public function insert(): Insert
     {
         return $this->store(new Insert());
     }
 
     /**
      * Start an UPDATE query.
-     *
-     * @return  \Hoa\Database\Query\Update
      */
-    public function update()
+    public function update(): Update
     {
         return $this->store(new Update());
     }
 
     /**
      * Start a DELETE query.
-     *
-     * @return  \Hoa\Database\Query\Delete
      */
-    public function delete()
+    public function delete(): Delete
     {
         return $this->store(new Delete());
     }
 
     /**
      * Start a WHERE clause.
-     *
-     * @param   string  $expression    Expression.
-     * @return  \Hoa\Database\Query\Where
      */
-    public function where($expression)
+    public function where(string $expression): Where
     {
         $where = new Where();
 
@@ -144,9 +125,6 @@ class Query
 
     /**
      * Store the current instance if necessary.
-     *
-     * @param   \Hoa\Database\Query\Dml  $object    Object.
-     * @return  \Hoa\Database\Query\Dml
      */
     protected function store($object)
     {
@@ -163,11 +141,8 @@ class Query
 
     /**
      * Get a query (a clone of it).
-     *
-     * @param   string  $id    ID.
-     * @return  \Hoa\Database\Query\Dml
      */
-    public static function get($id)
+    public static function get(string $id): ?Dml
     {
         if (null === $out = static::getReference($id)) {
             return null;
@@ -178,11 +153,8 @@ class Query
 
     /**
      * Get a query (not a clone of it).
-     *
-     * @param   string  $id    ID.
-     * @return  \Hoa\Database\Query\Dml
      */
-    public static function getReference($id)
+    public static function getReference(string $id): ?Dml
     {
         if (false === array_key_exists($id, static::$_queries)) {
             return null;
@@ -195,4 +167,4 @@ class Query
 /**
  * Flex entity.
  */
-Consistency::flexEntity('Hoa\Database\Query\Query');
+Consistency::flexEntity(Query::class);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -34,52 +36,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Database\Query;
+namespace Hoa\Database;
+
+use Hoa\Exception as HoaException;
 
 /**
- * Class \Hoa\Database\Query\Delete.
+ * Class \Hoa\Database\Exception.
  *
- * Build a DELETE query.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
+ * Extending the \Hoa\Exception\Exception class.
  */
-class Delete extends Where implements Dml
+class Exception extends HoaException
 {
-    use EncloseIdentifier;
-
-    /**
-     * Table name.
-     *
-     * @var string
-     */
-    protected $_from = null;
-
-
-
-    /**
-     * Set the table name.
-     *
-     * @param   string  $source    Table name.
-     * @return  \Hoa\Database\Query\Delete
-     */
-    public function from($source)
-    {
-        $this->_from = $source;
-
-        return $this;
-    }
-
-    /**
-     * Generate the query.
-     *
-     * @return  string
-     */
-    public function __toString()
-    {
-        return
-            'DELETE FROM ' .
-            $this->enclose($this->_from) .
-            parent::__toString();
-    }
 }

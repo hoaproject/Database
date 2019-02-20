@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -40,9 +42,6 @@ namespace Hoa\Database\Query;
  * Class \Hoa\Database\Query\Update.
  *
  * Build an UPDATE query.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Update extends Where implements Dml
 {
@@ -51,14 +50,14 @@ class Update extends Where implements Dml
     /**
      * Table.
      *
-     * @var string
+     * @var ?string
      */
     protected $_table = null;
 
     /**
      * Alternative to UPDATE.
      *
-     * @var string
+     * @var ?string
      */
     protected $_or    = null;
 
@@ -73,61 +72,48 @@ class Update extends Where implements Dml
 
     /**
      * Update or rollback.
-     *
-     * @return  \Hoa\Database\Query\Update
      */
-    public function rollback()
+    public function rollback(): self
     {
         return $this->_or('ROLLBACK');
     }
 
     /**
      * Update or abort.
-     *
-     * @return  \Hoa\Database\Query\Update
      */
-    public function abort()
+    public function abort(): self
     {
         return $this->_or('ABORT');
     }
 
     /**
      * Update or replace.
-     *
-     * @return  \Hoa\Database\Query\Update
      */
-    public function replace()
+    public function replace(): self
     {
         return $this->_or('REPLACE');
     }
 
     /**
      * Update or fail.
-     *
-     * @return  \Hoa\Database\Query\Update
      */
-    public function fail()
+    public function fail(): self
     {
         return $this->_or('FAIL');
     }
 
     /**
      * Update or ignore.
-     *
-     * @return  \Hoa\Database\Query\Update
      */
-    public function ignore()
+    public function ignore(): self
     {
         return $this->_or('IGNORE');
     }
 
     /**
      * Declare an alternative to “INSERT”.
-     *
-     * @param   string  $or    Alternative.
-     * @return  \Hoa\Database\Query\Update
      */
-    protected function _or($or)
+    protected function _or(string $or): self
     {
         $this->_or = $or;
 
@@ -136,11 +122,8 @@ class Update extends Where implements Dml
 
     /**
      * Set the table.
-     *
-     * @param   string  $table    Table.
-     * @return  \Hoa\Database\Query\Update
      */
-    public function table($table)
+    public function table(string $table): self
     {
         $this->_table = $table;
 
@@ -149,12 +132,8 @@ class Update extends Where implements Dml
 
     /**
      * Set a pair.
-     *
-     * @param   string  $name     Name.
-     * @param   mixed   $value    Value.
-     * @return  \Hoa\Database\Query\Update
      */
-    public function set($name, $value)
+    public function set(string $name, $value): self
     {
         $this->_set[$name] = $value;
 
@@ -163,10 +142,8 @@ class Update extends Where implements Dml
 
     /**
      * Generate the query.
-     *
-     * @return  string
      */
-    public function __toString()
+    public function __toString(): string
     {
         $out = 'UPDATE';
 

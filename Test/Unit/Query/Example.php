@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Hoa
  *
@@ -43,9 +45,6 @@ use Hoa\Test;
  * Class \Hoa\Database\Test\Unit\Query\Example.
  *
  * Test suite of some examples.
- *
- * @copyright  Copyright © 2007-2017 Hoa community
- * @license    New BSD License
  */
 class Example extends Test\Unit\Suite implements Test\Decorrelated
 {
@@ -91,7 +90,7 @@ class Example extends Test\Unit\Suite implements Test\Decorrelated
                                      ->select('c')
                                      ->from('bar')
                                      ->orderBy('c')
-                                     ->limit('2')
+                                     ->limit(2)
                                      ->offset('1')
             )
             ->then
